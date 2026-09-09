@@ -82,6 +82,7 @@ flowchart TB
 | [docs/12-hardware-spec.md](docs/12-hardware-spec.md) | 노트북 사양 및 예산 배분 (1,000만원 기준) |
 | [docs/13-pilot-plan.md](docs/13-pilot-plan.md) | 파일럿 실행 계획 (1~2개월, 월 1만원 미만) |
 | [docs/14-motion-reenactment.md](docs/14-motion-reenactment.md) | 모션 리타겟팅 엔진 — 이미지 인물을 영상 인물로 변경 |
+| [docs/15-entity-and-tax.md](docs/15-entity-and-tax.md) | 법인 구조 및 세제 — 조지아(국가) 기준 |
 
 ## 설계 원칙
 
