@@ -72,6 +72,7 @@ flowchart TB
 | [docs/07-compliance.md](docs/07-compliance.md) | 운영·윤리·법적 고려사항 (필독) |
 | [docs/08-roadmap.md](docs/08-roadmap.md) | 단계별 구축 로드맵 |
 | [docs/09-llm-serving.md](docs/09-llm-serving.md) | 로컬 LLM 서빙 (vLLM, 멀티 LoRA) |
+| [docs/10-budget-simulation.md](docs/10-budget-simulation.md) | 예상 예산 시뮬레이션 (GPU/LLM/UGC/SNS API) |
 
 ## 설계 원칙
 
