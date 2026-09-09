@@ -1,5 +1,7 @@
 # 03. 표정 변화 / 숏폼 영상 / 의상·메이크업 체인지 파이프라인
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 ## 목표
 
 [02](02-model-training.md)에서 학습한 페르소나 모델을 입력으로 받아,

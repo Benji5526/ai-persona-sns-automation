@@ -1,5 +1,7 @@
 # 02. ComfyUI 기반 페르소나 이미지 모델 트레이닝
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 ## 목표
 
 특정 페르소나(가상 얼굴/캐릭터)를 일관되게 생성할 수 있는 이미지 모델을 학습하고,

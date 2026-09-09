@@ -1,5 +1,7 @@
 # 05. 자동 포스팅 연동 (확장 단계)
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 ## 목표
 
 QC를 통과한 콘텐츠 에셋을 연결된 SNS 계정에 자동으로 게시. 대화 자동화([01](01-reply-automation.md))와

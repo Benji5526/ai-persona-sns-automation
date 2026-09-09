@@ -1,5 +1,7 @@
 # 전체 아키텍처
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 ## 1. 시스템 맵
 
 시스템은 서로 독립적으로 동작할 수 있는 두 개의 축과, 이를 잇는 공용 자산(페르소나 정의)으로 구성됩니다.

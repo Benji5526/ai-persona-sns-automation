@@ -1,5 +1,7 @@
 # 04. 구매 UGC 페이스스왑 자동화
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 ## 목표
 
 별도로 구매/라이선스한 UGC(사용자 제작 콘텐츠) 영상·이미지에 [02](02-model-training.md)에서 학습한

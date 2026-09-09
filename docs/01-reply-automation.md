@@ -1,5 +1,7 @@
 # 01. SNS DM/댓글 휴먼라이크 자동응답 설계
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 ## 목표
 
 정해진 시간에 여러 메시지에 "동시에" 답장하는 방식이 아니라,

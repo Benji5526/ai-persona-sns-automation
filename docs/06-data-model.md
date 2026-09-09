@@ -1,5 +1,7 @@
 # 06. 데이터 모델 설계
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 설계 단계이므로 실제 스키마(DB 테이블/DDL)가 아닌 **개념 모델**을 YAML 예시로 표현합니다.
 
 ## 1. 페르소나 정의 (Persona / Character Sheet)
