@@ -16,6 +16,43 @@
    구매한 UGC(영상/이미지)에 학습한 얼굴을 페이스스왑하여 콘텐츠를 대량 생산한 뒤,
    (선택적으로) 연결된 SNS 계정에 자동 포스팅까지 이어지는 파이프라인
 
+## 아키텍처
+
+```mermaid
+flowchart TB
+    subgraph PERSONA["페르소나 정의 (공용 자산)"]
+        P1["Character Sheet<br/>말투/지식/경계선"]
+        P2["학습된 이미지 모델<br/>(LoRA/Checkpoint)"]
+    end
+
+    subgraph CONV["축 A. 대화 자동화"]
+        A1[SNS DM/댓글 수집기]
+        A2[의도·문맥 분석]
+        A3[휴먼라이크 응답 스케줄러]
+        A4[응답 발송]
+        A1 --> A2 --> A3 --> A4
+    end
+
+    subgraph CONTENT["축 B. 콘텐츠 자동화"]
+        B1[데이터셋 큐레이션]
+        B2[ComfyUI 모델 트레이닝]
+        B3[표정/영상/의상 파이프라인]
+        B4[구매 UGC 페이스스왑]
+        B5[QC 게이트]
+        B6[자동 포스팅]
+        B1 --> B2 --> B3 --> B5
+        B2 --> B4 --> B5
+        B5 --> B6
+    end
+
+    P1 -.페르소나 톤 반영.-> A2
+    P2 -.모델 제공.-> B3
+    P2 -.얼굴 소스 제공.-> B4
+    B6 -.게시 결과/반응.-> A1
+```
+
+세부 다이어그램(시퀀스, 큐 구조, ERD 등)은 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) 및 각 모듈 문서에 있습니다.
+
 ## 문서 구조
 
 | 문서 | 내용 |
