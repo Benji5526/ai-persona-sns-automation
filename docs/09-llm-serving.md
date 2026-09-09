@@ -62,7 +62,38 @@ vLLM(대화 자동화, 상시·저지연 필요)과 ComfyUI 트레이닝/생성/
   "생성" 자체는 충분히 빨라야 함 (지연은 스케줄러가 의도적으로 늘리는 것이지, 모델이 느려서 늦는 것이 아니어야 함)
 - LoRA 파인튜닝 생태계 성숙도 (페르소나별 어댑터 학습 난이도)
 
-## 5. 학습(LoRA) vs 프롬프트 기반 — 언제 학습이 필요한가
+## 5. 서빙 엔진 대안 & OS 선택 (vLLM이 정답은 아닐 수 있음)
+
+지금 규모(저동시성, 페르소나 1~수 개)에서는 vLLM의 강점(고처리량 동시 서빙)을 활용하기 어렵고,
+Windows 네이티브 미지원 등 운영 부담도 있습니다. 아래는 대안 엔진과, 그에 따른 OS 선택 기준입니다.
+
+| 엔진 | 특징 | 적합한 경우 |
+|---|---|---|
+| **llama.cpp (llama-server)** | Mac(Metal)·Windows(CUDA) 어디서든 동일하게 동작, OpenAI 호환 API, continuous batching·function calling 지원 | 플랫폼에 얽매이지 않는 범용 선택지 |
+| **MLX-LM** | Apple 공식 프레임워크, 유니파이드 메모리 활용 최적화, LoRA 파인튜닝 + OpenAI 호환 서버 내장 | Mac으로 확정 시 최적 |
+| **Ollama** | llama.cpp 기반, 설치·운영이 가장 쉬움 | [11-recommended-sequence.md](11-recommended-sequence.md)의 수동 파일럿 단계에 적합 |
+| **vllm-metal** | vLLM을 MLX 백엔드로 Mac에서 구동하는 커뮤니티 플러그인. 2026년 들어 성능 개선 중이나 지원 모델이 제한적 | vLLM 생태계(멀티 LoRA)를 Mac에서 유지하고 싶은 경우, 단 안정성 검증 필요 |
+
+> 멀티 LoRA 동시 서빙(여러 페르소나 어댑터를 한 서버에서 실시간 전환)은 아직 vLLM(CUDA)만큼 성숙한
+> 대안이 없습니다. 다만 지금 단계에서는 아래 6번("학습 vs 프롬프트 기반")처럼
+> 프롬프트 기반으로 시작하므로 이 제약이 당장 문제되지 않습니다.
+
+### Mac vs Windows — 이 프로젝트에서의 권장
+
+이 프로젝트의 실제 병목은 LLM이 아니라 **ComfyUI 기반 생성·페이스스왑·영상 파이프라인**([02](02-model-training.md)~[04](04-faceswap-ugc.md))이고,
+그 생태계(ReActor, IPAdapter, 각종 양자화 도구)는 여전히 CUDA/Windows·Linux 중심입니다. Mac에서는 얼굴스왑 등
+GPU 가속이 CPU로 폴백되어 눈에 띄게 느려집니다.
+
+| 선택 | 장점 | 단점 |
+|---|---|---|
+| **Windows + NVIDIA GPU (권장)** | LLM(llama.cpp/Ollama)과 ComfyUI 생성 파이프라인을 **한 머신**에서 처리, 생태계 호환성 최상 | vLLM 자체는 Windows 네이티브 미지원 (필요시 WSL2) |
+| Mac (Apple Silicon) | LLM 상시 구동 시 전력 효율·정숙성 우수, MLX-LM 생태계 성숙 | ComfyUI/페이스스왑은 CPU 폴백으로 느림 → 결국 콘텐츠 파이프라인용 CUDA GPU를 별도로 필요 (클라우드 대여 등), 기기가 두 대로 분리됨 |
+
+**결론**: 파이프라인을 하나로 통합해 운영 복잡도를 줄이려면 Windows + NVIDIA. Mac은 대화 자동화(Axis A)만
+분리 운영하고 콘텐츠 파이프라인(Axis B)은 계속 클라우드 CUDA GPU로 처리하는 하이브리드 구조에서만 이점이 있으며,
+지금 규모(저동시성, 단일/소수 페르소나)에서는 그 이점이 크지 않으므로 Windows + NVIDIA 단일 구성을 권장합니다.
+
+## 6. 학습(LoRA) vs 프롬프트 기반 — 언제 학습이 필요한가
 
 이 문서의 멀티 LoRA 서빙은 "학습된 페르소나 어댑터가 있다"는 것을 전제로 하지만,
 **처음부터 학습이 필수는 아닙니다.** 페르소나 말투는 시스템 프롬프트(캐릭터 시트, [06-data-model.md](06-data-model.md)의
