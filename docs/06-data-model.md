@@ -24,6 +24,10 @@ persona:
     trigger_words: ["p001face"]
     approved_at: "2026-08-01"
     approved_by: "internal-review"
+  conversation_model: # 09-llm-serving.md의 vLLM 멀티 LoRA 서빙과 연동
+    base_model: "qwen-...-base" # 확정 전까지 placeholder
+    lora_ref: null # 프롬프트 기반 운영 중에는 null, 학습 후 채움 (09번 문서 5절 "학습 vs 프롬프트" 참고)
+    served_via: "vllm" # 또는 llama.cpp/ollama/mlx-lm — 09번 문서 5절 참고
   content_style:
     allowed_outfits: ["casual", "office", "sportswear"]
     allowed_expressions: ["smile", "neutral", "surprised"]
@@ -41,6 +45,9 @@ conversation:
   status: "awaiting_reply" # collected | queued | replied | escalated
   priority_score: 0.42
   intent_tags: ["문의"]
+  ai_disclosure:
+    disclosed_at: "2026-09-08T10:00:05+09:00" # 최초 응답 전 1회 고지 시점, null이면 아직 미고지
+    method: "first_message" # EU AI Act Art. 50(1) 대응 — 07-compliance.md 2번 참고
   history:
     - role: user
       text: "..."
@@ -58,8 +65,8 @@ asset:
   id: asset_0001
   persona_id: persona_001
   type: "video" # image | video
-  source: "generated" # generated | ugc_faceswap
-  ugc_license_ref: null # ugc_faceswap인 경우 필수: license_0001
+  source: "generated" # generated | ugc_faceswap | motion_retarget — 3개 엔진과 1:1 대응 (ARCHITECTURE.md)
+  source_license_ref: null # ugc_faceswap · motion_retarget(드라이빙 영상)인 경우 필수: license_0001
   pipeline:
     workflow_id: "expr_to_video_v2"
     params: { expression: "smile", outfit: "casual" }
@@ -96,11 +103,14 @@ ugc_license:
 ```mermaid
 erDiagram
     PERSONA ||--o{ CONVERSATION : "대화 주체"
-    PERSONA ||--o{ ASSET : "이미지 모델 제공"
-    UGC_LICENSE ||--o{ ASSET : "페이스스왑 소스 근거"
+    PERSONA ||--o{ ASSET : "이미지·대화 모델 제공"
+    UGC_LICENSE ||--o{ ASSET : "얼굴교체·모션 리타겟팅 소스 근거"
     ASSET }o--|| PUBLISH_SCHEDULE : "발행 대상"
     CONVERSATION ||--o{ MESSAGE : "이력"
 ```
 
-`ASSET.ugc_license_ref`가 필수인 이유는 [04-faceswap-ugc.md](04-faceswap-ugc.md)의 권리 확인 게이트를
-데이터 모델 수준에서 강제하기 위함입니다 (라이선스 근거 없는 페이스스왑 에셋은 생성 자체가 막히도록 설계).
+`ASSET.source_license_ref`가 필수인 이유는 [04-faceswap-ugc.md](04-faceswap-ugc.md)(얼굴교체 엔진)와
+[14-motion-reenactment.md](14-motion-reenactment.md)(모션 리타겟팅 엔진)의 권리 확인 게이트를
+데이터 모델 수준에서 강제하기 위함입니다 (라이선스 근거 없는 에셋은 생성 자체가 막히도록 설계).
+`CONVERSATION.ai_disclosure`는 [07-compliance.md](07-compliance.md)의 EU AI Act Art. 50(1) 대응을
+스레드 단위로 추적하기 위한 필드입니다.
