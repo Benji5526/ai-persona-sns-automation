@@ -220,7 +220,8 @@ footer a{ color:var(--bp-ink); }
           <path d="M825 240 V264" stroke="#d7e9fb" marker-end="url(#arrow)"/>
 
           <rect x="710" y="264" width="230" height="44" fill="none" stroke="#d7e9fb"/>
-          <text x="825" y="291" text-anchor="middle">07 UGC 페이스스왑</text>
+          <text x="825" y="284" text-anchor="middle" font-size="11.5">07 얼굴교체 · 모션 리타겟팅</text>
+          <text x="825" y="298" text-anchor="middle" font-size="9.5" class="dim">(3개 독립 엔진, SHEET 3 참고)</text>
           <path d="M825 308 V332" stroke="#d7e9fb" marker-end="url(#arrow)"/>
 
           <rect x="710" y="332" width="230" height="44" fill="none" stroke="#d7e9fb"/>
@@ -325,11 +326,11 @@ footer a{ color:var(--bp-ink); }
 
   <!-- ===================== SHEET 3 — CONTENT AUTOMATION ===================== -->
   <section class="sheet">
-    <div class="sheet-head"><span class="sheet-num">SHEET 3 / 4</span><h2>콘텐츠 자동화 — 생성 &amp; 페이스스왑 파이프라인</h2></div>
-    <p class="sheet-desc">학습된 페르소나 모델은 생성 파이프라인(표정·영상·의상)과 UGC 페이스스왑, 두 경로로 소비되어 하나의 QC 게이트를 통과한 뒤 발행된다. UGC 경로는 권리확인 게이트를 먼저 통과해야 한다.</p>
+    <div class="sheet-head"><span class="sheet-num">SHEET 3 / 4</span><h2>콘텐츠 자동화 — 3개 독립 엔진 파이프라인</h2></div>
+    <p class="sheet-desc">학습된 페르소나 모델은 서로 다른 모델을 쓰는 3개 엔진(생성 · 얼굴교체 · 모션 리타겟팅)으로 소비되어 하나의 QC 게이트를 통과한 뒤 발행된다. UGC/드라이빙 영상 경로는 둘 다 권리확인 게이트를 먼저 통과해야 한다.</p>
 
     <div class="diagram-wrap">
-      <svg viewBox="0 0 960 380" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 960 480" xmlns="http://www.w3.org/2000/svg">
         <g font-size="12.5">
           <!-- main row -->
           <rect x="20" y="130" width="140" height="56" fill="none" stroke="#d7e9fb"/>
@@ -366,8 +367,24 @@ footer a{ color:var(--bp-ink); }
           <path d="M316 312 H382" stroke="#d7e9fb" marker-end="url(#arrow)"/>
 
           <rect x="382" y="286" width="180" height="52" fill="none" stroke="#d7e9fb"/>
-          <text x="472" y="317" text-anchor="middle">페이스스왑</text>
-          <path d="M562 312 C 610 312, 610 210, 630 190" stroke="#d7e9fb" fill="none" marker-end="url(#arrow)"/>
+          <text x="472" y="311" text-anchor="middle" font-size="11.5">얼굴교체 엔진</text>
+          <text x="472" y="325" text-anchor="middle" font-size="10" class="dim">이미지/영상 공용</text>
+          <path d="M562 312 C 610 312, 600 220, 618 194" stroke="#d7e9fb" fill="none" marker-end="url(#arrow)"/>
+
+          <!-- Motion retargeting row -->
+          <rect x="20" y="396" width="140" height="52" fill="none" stroke="#d7e9fb"/>
+          <text x="90" y="426" text-anchor="middle" font-size="11.5">드라이빙 영상</text>
+          <path d="M160 422 H196" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <polygon points="256,396 316,422 256,448 196,422" fill="none" stroke="#ff8066"/>
+          <text x="256" y="418" text-anchor="middle" font-size="10.5" fill="#ff8066">권리확인</text>
+          <text x="256" y="431" text-anchor="middle" font-size="10.5" fill="#ff8066">게이트</text>
+          <path d="M316 422 H382" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="382" y="396" width="180" height="52" fill="none" stroke="#ff6fae"/>
+          <text x="472" y="421" text-anchor="middle" font-size="11.5">모션 리타겟팅 엔진</text>
+          <text x="472" y="435" text-anchor="middle" font-size="10" class="dim">얼굴교체와 다른 모델</text>
+          <path d="M562 422 C 640 422, 630 250, 692 194" stroke="#ff6fae" fill="none" marker-end="url(#arrow)"/>
 
           <!-- reject loop -->
           <path d="M655 210 C 655 260, 472 260, 472 210" stroke="#7ea2c9" stroke-dasharray="4 4" fill="none" marker-end="url(#arrowDim)"/>
@@ -379,21 +396,22 @@ footer a{ color:var(--bp-ink); }
     <div class="legend" style="margin-bottom:0;">
       <div class="item"><svg width="18" height="18"><polygon points="9,1 17,9 9,17 1,9" fill="none" stroke="#ff8066"/></svg> 권리확인 게이트 (라이선스 필수)</div>
       <div class="item"><svg width="18" height="18"><circle cx="9" cy="9" r="8" fill="none" stroke="#ffb454"/><polygon points="4,4 9,9 4,14" fill="none" stroke="#ffb454"/><polygon points="14,4 9,9 14,14" fill="none" stroke="#ffb454"/></svg> QC 게이트 (밸브 기호)</div>
+      <div class="item"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#ff6fae" stroke-width="2"/></svg> 모션 리타겟팅 엔진 (얼굴교체와 별도 모델)</div>
     </div>
-    <p class="doc-refs">근거 문서 — <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/02-model-training.md">02</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/03-content-pipeline.md">03</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/04-faceswap-ugc.md">04-faceswap-ugc.md</a></p>
+    <p class="doc-refs">근거 문서 — <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/02-model-training.md">02</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/03-content-pipeline.md">03</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/04-faceswap-ugc.md">04-faceswap-ugc.md</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/14-motion-reenactment.md">14-motion-reenactment.md</a></p>
   </section>
 
   <!-- ===================== SHEET 4 — ROADMAP & COMPLIANCE ===================== -->
   <section class="sheet">
     <div class="sheet-head"><span class="sheet-num">SHEET 4 / 4</span><h2>공정표 &amp; 현장 노트</h2></div>
-    <p class="sheet-desc">두 축은 Phase 1–2를 병렬 착수할 수 있다. Phase 4(UGC 페이스스왑)는 법률 검토 선행, Phase 5(완전 자동 발행)는 반자동 운영을 한 차례 거친 뒤 진입한다.</p>
+    <p class="sheet-desc">두 축은 Phase 1–2를 병렬 착수할 수 있다. Phase 4(얼굴교체·모션 리타겟팅)는 법률 검토 선행, Phase 5(완전 자동 발행)는 반자동 운영을 한 차례 거친 뒤 진입한다.</p>
 
     <div class="roadmap">
       <div class="phase"><div class="rail"></div><div class="pnum">PH.0</div><div class="ptitle">기반 준비 · 권리관계 정리</div></div>
       <div class="phase"><div class="rail"></div><div class="pnum">PH.1</div><div class="ptitle">대화 자동화 MVP (반자동)</div></div>
       <div class="phase"><div class="rail"></div><div class="pnum">PH.2</div><div class="ptitle">이미지 모델 트레이닝</div></div>
       <div class="phase"><div class="rail"></div><div class="pnum">PH.3</div><div class="ptitle">콘텐츠 파이프라인 확장</div></div>
-      <div class="phase"><div class="rail"></div><div class="pnum">PH.4</div><div class="ptitle">UGC 페이스스왑</div></div>
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.4</div><div class="ptitle">얼굴교체·모션 리타겟팅</div></div>
       <div class="phase"><div class="rail"></div><div class="pnum">PH.5</div><div class="ptitle">완전 자동화 통합</div></div>
       <div class="phase"><div class="rail"></div><div class="pnum">PH.6</div><div class="ptitle">다중 페르소나 스케일아웃</div></div>
     </div>
