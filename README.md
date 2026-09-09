@@ -1,5 +1,7 @@
 # AI Persona SNS Automation — 설계 문서
 
+저장소: https://github.com/Benji5526/ai-persona-sns-automation
+
 개인 페르소나를 중심으로 SNS 운영을 자동화하는 시스템의 설계 저장소입니다.
 **이 저장소는 설계(design)만 다룹니다. 실제 구현 코드는 포함하지 않습니다.**
 
