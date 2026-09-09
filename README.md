@@ -21,6 +21,11 @@
 전체 설계를 도면 형식의 단일 페이지로 정리했습니다 — [blueprint/index.html](blueprint/index.html)
 (다운로드 후 브라우저로 열어서 확인하세요. GitHub 미리보기에서는 렌더링되지 않습니다.)
 
+## 콘텐츠 파이프라인 시뮬레이터
+
+ComfyUI 노드 그래프 형태로 생성·페이스스왑·QC·자동 포스팅 파이프라인의 실행 흐름을 재현한 인터랙티브 데모 —
+[pipeline-simulator/index.html](pipeline-simulator/index.html) (다운로드 후 브라우저로 열어서 확인, 실제 GPU/ComfyUI는 실행하지 않는 시뮬레이션입니다)
+
 ## 아키텍처
 
 ```mermaid

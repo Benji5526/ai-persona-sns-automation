@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>페르소나 파이프라인 시뮬레이터</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#16171c;
+  --canvas:#1b1d24;
+  --panel:#23252d;
+  --panel-2:#2a2d37;
+  --border:#3a3d49;
+  --border-soft:#2e313c;
+  --text:#e7e8ee;
+  --text-dim:#8d90a0;
+  --wire:#4b4e5c;
+  --wire-active:#5ec8ff;
+  --accent-loader:#5b7fff;
+  --accent-sampling:#b57bff;
+  --accent-pipeline:#35c9c1;
+  --accent-process:#ff9d5c;
+  --accent-validate:#ffcf5c;
+  --accent-output:#4ade80;
+  --accent-reject:#ff6b6b;
+  --font-kr:'IBM Plex Sans KR','Malgun Gothic',sans-serif;
+  --font-mono:'IBM Plex Mono','Consolas',monospace;
+}
+*{box-sizing:border-box;}
+body{ background:var(--bg); color:var(--text); font-family:var(--font-kr); }
+h1,h2,h3{ margin:0; text-wrap:balance; }
+button{ font-family:var(--font-kr); cursor:pointer; }
+
+.app{ display:flex; flex-direction:column; height:100%; min-height:100vh; }
+
+.banner{
+  background:linear-gradient(90deg, rgba(255,207,92,0.12), rgba(255,207,92,0.04));
+  border-bottom:1px solid var(--border-soft);
+  color:#ffcf5c; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.02em;
+  padding:8px 16px; text-align:center;
+}
+
+.topbar{
+  display:flex; align-items:center; gap:16px; padding:12px 18px;
+  border-bottom:1px solid var(--border-soft); background:var(--panel); flex-wrap:wrap;
+}
+.topbar h1{ font-size:15.5px; font-weight:700; margin-right:auto; }
+.topbar .sub{ font-family:var(--font-mono); font-size:10.5px; color:var(--text-dim); display:block; margin-top:2px; }
+
+.field{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-dim); }
+.field select{
+  background:var(--panel-2); color:var(--text); border:1px solid var(--border);
+  border-radius:4px; padding:5px 8px; font-family:var(--font-mono); font-size:11.5px;
+}
+.toggle{ display:flex; align-items:center; gap:8px; font-size:12.5px; }
+.toggle input{ accent-color:var(--accent-process); width:16px; height:16px; }
+
+.queue-btn{
+  background:var(--accent-output); color:#0c1a10; border:none; border-radius:5px;
+  padding:8px 18px; font-size:13px; font-weight:700; letter-spacing:.02em;
+  transition:opacity .15s;
+}
+.queue-btn:disabled{ opacity:.5; cursor:default; }
+.queue-count{
+  font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+  border:1px solid var(--border); border-radius:4px; padding:5px 9px;
+}
+
+.main{ flex:1; display:flex; min-height:0; }
+
+.canvas-wrap{ flex:1; overflow:auto; background:var(--canvas);
+  background-image: radial-gradient(circle, var(--border-soft) 1px, transparent 1px);
+  background-size: 22px 22px; position:relative;
+}
+.canvas{ position:relative; width:1220px; height:620px; }
+
+.node{
+  position:absolute; background:var(--panel); border:1px solid var(--border);
+  border-radius:6px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,.35);
+  transition:border-color .2s, box-shadow .2s;
+}
+.node.active{ border-color:var(--wire-active); box-shadow:0 0 0 1px var(--wire-active), 0 0 18px rgba(94,200,255,.35); }
+.node.done{ border-color:var(--accent-output); }
+.node.dim{ opacity:.35; filter:grayscale(.4); }
+.node-head{ padding:6px 10px; font-family:var(--font-mono); font-size:11px; font-weight:600; color:#0b0c10; }
+.node-body{ padding:8px 10px 10px; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); line-height:1.65; }
+.node-body b{ color:var(--text); font-weight:500; }
+.node-prog{ height:3px; background:var(--border-soft); }
+.node-prog-fill{ height:100%; width:0%; background:var(--wire-active); transition:width linear; }
+.node.done .node-prog-fill{ background:var(--accent-output); width:100%!important; transition:width .3s; }
+
+.socket{ position:absolute; width:9px; height:9px; border-radius:50%; background:var(--panel-2); border:1.5px solid var(--wire); transform:translate(-50%,-50%); }
+.socket.active{ border-color:var(--wire-active); background:var(--wire-active); }
+
+svg.wires{ position:absolute; top:0; left:0; pointer-events:none; }
+svg.wires path{ fill:none; stroke:var(--wire); stroke-width:1.6; }
+svg.wires path.active{ stroke:var(--wire-active); stroke-width:2.2; }
+svg.wires path.reject{ stroke:var(--accent-reject); stroke-dasharray:5 5; opacity:.55; }
+
+.sidebar{ width:300px; flex:none; border-left:1px solid var(--border-soft); background:var(--panel);
+  display:flex; flex-direction:column; min-height:0; }
+.sidebar-section{ padding:12px 14px; border-bottom:1px solid var(--border-soft); }
+.sidebar-section h2{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; }
+
+.console{ flex:1; min-height:160px; overflow-y:auto; padding:10px 12px; font-family:var(--font-mono); font-size:11px; line-height:1.7; background:#101116; }
+.console .line{ white-space:pre-wrap; word-break:break-all; }
+.console .tag{ color:var(--wire-active); }
+.console .ok{ color:var(--accent-output); }
+.console .warn{ color:var(--accent-reject); }
+.console .dim{ color:var(--text-dim); }
+
+.preview{ padding:14px; }
+.preview-card{ border:1px dashed var(--border); border-radius:8px; padding:14px; text-align:center; }
+.preview-avatar{ width:100%; aspect-ratio:1/1; border-radius:8px; margin-bottom:10px;
+  background: conic-gradient(from 200deg, #5b7fff, #b57bff, #35c9c1, #ff9d5c, #5b7fff);
+  display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.preview-avatar::before{ content:''; position:absolute; inset:14%; border-radius:50%; background:var(--panel-2); opacity:.85; }
+.preview-avatar::after{ content:'◠  ◡  ◠'; position:relative; font-size:13px; letter-spacing:3px; color:var(--text-dim); }
+.preview-label{ font-family:var(--font-mono); font-size:9.5px; color:var(--accent-validate); letter-spacing:.06em; margin-bottom:8px; }
+.preview-meta{ text-align:left; font-family:var(--font-mono); font-size:10.5px; color:var(--text-dim); margin-top:10px; display:grid; gap:4px; }
+.preview-meta b{ color:var(--text); font-weight:500; }
+.preview-empty{ font-family:var(--font-mono); font-size:11px; color:var(--text-dim); text-align:center; padding:30px 10px; }
+
+.legend{ display:flex; flex-wrap:wrap; gap:8px 12px; font-size:10.5px; color:var(--text-dim); font-family:var(--font-mono); }
+.legend span{ display:inline-flex; align-items:center; gap:5px; }
+.legend i{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="banner">⚠ 시뮬레이션 — 실제 ComfyUI/GPU를 실행하지 않습니다. 노드 실행 흐름·타이밍·로그만 재현합니다.</div>
+
+  <div class="topbar">
+    <div>
+      <h1>페르소나 콘텐츠 파이프라인</h1>
+      <span class="sub">02~05번 설계 문서 기반 · 표정·영상·의상 생성 + UGC 페이스스왑 → QC → 포스팅</span>
+    </div>
+    <div class="field">
+      <span>페르소나</span>
+      <select id="personaSelect">
+        <option>persona_001</option>
+        <option>persona_002</option>
+      </select>
+    </div>
+    <label class="toggle"><input type="checkbox" id="ugcToggle" checked> UGC 페이스스왑 경로 포함</label>
+    <span class="queue-count" id="queueCount">QUEUE: 0</span>
+    <button class="queue-btn" id="queueBtn">▶ Queue Prompt</button>
+  </div>
+
+  <div class="main">
+    <div class="canvas-wrap">
+      <div class="canvas" id="canvas">
+        <svg class="wires" id="wires" width="1220" height="620"></svg>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <h2>Legend</h2>
+        <div class="legend">
+          <span><i style="background:var(--accent-loader)"></i>Loader</span>
+          <span><i style="background:var(--accent-sampling)"></i>Sampling</span>
+          <span><i style="background:var(--accent-pipeline)"></i>Pipeline</span>
+          <span><i style="background:var(--accent-process)"></i>Process</span>
+          <span><i style="background:var(--accent-validate)"></i>Validate</span>
+          <span><i style="background:var(--accent-output)"></i>Output</span>
+        </div>
+      </div>
+      <div class="sidebar-section" style="flex:1; display:flex; flex-direction:column; min-height:0; padding:0; border-bottom:none;">
+        <h2 style="padding:12px 14px 0;">Console</h2>
+        <div class="console" id="console"><div class="line dim">& 대기 중 — Queue Prompt를 눌러 시뮬레이션을 시작하세요.</div></div>
+      </div>
+      <div class="preview">
+        <h2 style="margin-bottom:10px;">Output Preview</h2>
+        <div id="previewBox"><div class="preview-empty">아직 생성된 결과가 없습니다.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const NODES = [
+  {id:'lora', title:'Persona LoRA Loader', cat:'loader', x:20, y:210, w:180, h:100,
+    body:['lora: <b>persona_001_v3.safetensors</b>','trigger: p001face','weight: 0.85'],
+    log:'[LoRA Loader] persona_001_v3.safetensors 로드'},
+  {id:'ckpt', title:'Checkpoint Loader', cat:'loader', x:20, y:340, w:180, h:88,
+    body:['ckpt: <b>sdxl_base_1.0.safetensors</b>'],
+    log:'[Checkpoint Loader] sdxl_base_1.0 로드'},
+  {id:'ksampler', title:'KSampler (Base Generate)', cat:'sampling', x:240, y:258, w:190, h:130,
+    body:['sampler: dpmpp_2m','steps: 24 · cfg: 6.5','seed: <b>random</b>'],
+    log:'[KSampler] 베이스 이미지 생성 중 (steps 24)'},
+  {id:'expr', title:'Expression Control', cat:'pipeline', x:480, y:90, w:180, h:96,
+    body:['expression: <b>smile</b>','strength: 0.7'],
+    log:'[Expression] 표정 변화 적용'},
+  {id:'outfit', title:'Outfit / Makeup Change', cat:'pipeline', x:480, y:220, w:180, h:96,
+    body:['outfit: <b>casual</b>','mask: auto'],
+    log:'[Outfit] 의상 인페인팅 적용'},
+  {id:'video', title:'Image → Video', cat:'pipeline', x:480, y:350, w:180, h:96,
+    body:['frames: 24 · fps: 8','model: img2vid'],
+    log:'[Image→Video] 숏폼 영상 보간 생성'},
+  {id:'ugc', title:'UGC Source', cat:'loader', x:240, y:466, w:180, h:76,
+    body:['source: ugc_batch_014','license: license_0001'],
+    log:'[UGC Source] 라이선스 확인된 원본 로드'},
+  {id:'faceswap', title:'Face Swap', cat:'process', x:480, y:466, w:180, h:96,
+    body:['face_ref: persona_001','blend: 0.9'],
+    log:'[Face Swap] 프레임별 얼굴 합성'},
+  {id:'qc', title:'QC Gate', cat:'validate', x:720, y:236, w:170, h:160,
+    body:['id_sim ≥ 0.82','artifact_check: on','반려 시 재생성 루프'],
+    log:'[QC Gate] 정체성 유사도·아티팩트 검사'},
+  {id:'post', title:'Auto Post Queue', cat:'output', x:950, y:262, w:190, h:120,
+    body:['targets: IG · Threads','X · TikTok','status: scheduled'],
+    log:'[Auto Post] 발행 큐 등록 완료'},
+];
+
+const WIRES = [
+  {from:'lora', to:'ksampler', toIdx:0, toN:2},
+  {from:'ckpt', to:'ksampler', toIdx:1, toN:2},
+  {from:'ksampler', to:'expr'},
+  {from:'ksampler', to:'outfit'},
+  {from:'ksampler', to:'video'},
+  {from:'ugc', to:'faceswap', ugcOnly:true},
+  {from:'expr', to:'qc', toIdx:0, toN:4},
+  {from:'outfit', to:'qc', toIdx:1, toN:4},
+  {from:'video', to:'qc', toIdx:2, toN:4},
+  {from:'faceswap', to:'qc', toIdx:3, toN:4, ugcOnly:true},
+  {from:'qc', to:'post'},
+];
+const CAT_COLOR = {
+  loader:'var(--accent-loader)', sampling:'var(--accent-sampling)', pipeline:'var(--accent-pipeline)',
+  process:'var(--accent-process)', validate:'var(--accent-validate)', output:'var(--accent-output)'
+};
+
+const canvas = document.getElementById('canvas');
+const wiresSvg = document.getElementById('wires');
+const consoleEl = document.getElementById('console');
+const previewBox = document.getElementById('previewBox');
+const queueBtn = document.getElementById('queueBtn');
+const queueCountEl = document.getElementById('queueCount');
+const ugcToggle = document.getElementById('ugcToggle');
+let queueCount = 0;
+
+function byId(id){ return NODES.find(n => n.id === id); }
+function outSocket(n){ return {x: n.x + n.w, y: n.y + n.h/2}; }
+function inSocket(n, idx, total){
+  if(!total || total <= 1) return {x: n.x, y: n.y + n.h/2};
+  return {x: n.x, y: n.y + n.h * (idx+1)/(total+1)};
+}
+
+function renderNodes(){
+  NODES.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'node'; el.id = 'node-'+n.id;
+    el.style.left = n.x+'px'; el.style.top = n.y+'px'; el.style.width = n.w+'px'; el.style.height = n.h+'px';
+    el.innerHTML = `
+      <div class="node-head" style="background:${CAT_COLOR[n.cat]}">${n.title}</div>
+      <div class="node-body">${n.body.join('<br>')}</div>
+      <div class="node-prog"><div class="node-prog-fill" id="prog-${n.id}"></div></div>`;
+    canvas.appendChild(el);
+
+    const out = outSocket(n);
+    const so = document.createElement('div');
+    so.className = 'socket'; so.id = 'sock-out-'+n.id;
+    so.style.left = out.x+'px'; so.style.top = out.y+'px';
+    canvas.appendChild(so);
+  });
+}
+
+function wirePath(a, b){
+  const dx = Math.max(60, (b.x - a.x) * 0.5);
+  return `M ${a.x} ${a.y} C ${a.x+dx} ${a.y}, ${b.x-dx} ${b.y}, ${b.x} ${b.y}`;
+}
+
+function renderWires(){
+  wiresSvg.innerHTML = '';
+  WIRES.forEach((w, i) => {
+    const from = byId(w.from), to = byId(w.to);
+    const a = outSocket(from);
+    const b = inSocket(to, w.toIdx, w.toN);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', wirePath(a,b));
+    path.id = 'wire-'+i;
+    if(w.ugcOnly) path.dataset.ugc = '1';
+    wiresSvg.appendChild(path);
+  });
+  const qc = byId('qc'), ks = byId('ksampler');
+  const a = {x: qc.x, y: qc.y + qc.h - 10};
+  const b = {x: ks.x + ks.w/2, y: ks.y + ks.h};
+  const reject = document.createElementNS('http://www.w3.org/2000/svg','path');
+  reject.setAttribute('d', `M ${a.x} ${a.y} C ${a.x-160} ${a.y+70}, ${b.x-40} ${b.y+90}, ${b.x} ${b.y}`);
+  reject.classList.add('reject');
+  wiresSvg.appendChild(reject);
+}
+
+function setUgcDim(){
+  const on = ugcToggle.checked;
+  ['ugc','faceswap'].forEach(id => {
+    document.getElementById('node-'+id).classList.toggle('dim', !on);
+  });
+  WIRES.forEach((w,i) => {
+    if(w.ugcOnly) document.getElementById('wire-'+i).style.opacity = on ? '1' : '0.15';
+  });
+}
+ugcToggle.addEventListener('change', setUgcDim);
+
+function log(html){
+  const line = document.createElement('div');
+  line.className = 'line'; line.innerHTML = html;
+  consoleEl.appendChild(line);
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+async function runNode(id, duration){
+  const el = document.getElementById('node-'+id);
+  const prog = document.getElementById('prog-'+id);
+  const n = byId(id);
+  el.classList.add('active');
+  log(`<span class="tag">EXEC</span> ${n.log}...`);
+  prog.style.transition = `width ${duration}ms linear`;
+  requestAnimationFrame(() => { prog.style.width = '100%'; });
+  await sleep(duration);
+  el.classList.remove('active'); el.classList.add('done');
+  log(`<span class="ok">DONE</span> ${n.title} — ${(duration/1000).toFixed(1)}s`);
+}
+
+function setWireActive(fromId, toId, active){
+  WIRES.forEach((w,i) => {
+    if(w.from===fromId && w.to===toId) document.getElementById('wire-'+i).classList.toggle('active', active);
+  });
+}
+
+async function runPipeline(){
+  const includeUgc = ugcToggle.checked;
+  const persona = document.getElementById('personaSelect').value;
+
+  queueBtn.disabled = true; queueBtn.textContent = '⏳ 실행 중...';
+  consoleEl.innerHTML = '';
+  NODES.forEach(n => {
+    document.getElementById('node-'+n.id).classList.remove('done','active');
+    const p = document.getElementById('prog-'+n.id);
+    p.style.transition = 'none'; p.style.width = '0%';
+  });
+  previewBox.innerHTML = '<div class="preview-empty">생성 중...</div>';
+
+  queueCount++; queueCountEl.textContent = 'QUEUE: '+queueCount;
+  log(`<span class="dim">─ job #${queueCount} · persona=${persona} · ugc=${includeUgc} ─</span>`);
+
+  await runNode('lora', 700);
+  await runNode('ckpt', 500);
+  setWireActive('lora','ksampler',true); setWireActive('ckpt','ksampler',true);
+  await runNode('ksampler', 1300);
+  setWireActive('lora','ksampler',false); setWireActive('ckpt','ksampler',false);
+
+  setWireActive('ksampler','expr',true); setWireActive('ksampler','outfit',true); setWireActive('ksampler','video',true);
+  const parallel = [runNode('expr', 900), runNode('outfit', 950), runNode('video', 1400)];
+  if(includeUgc){ parallel.push(runNode('ugc', 500).then(() => runNode('faceswap', 1100))); }
+  await Promise.all(parallel);
+  setWireActive('ksampler','expr',false); setWireActive('ksampler','outfit',false); setWireActive('ksampler','video',false);
+
+  ['expr','outfit','video'].forEach(id => setWireActive(id,'qc',true));
+  if(includeUgc) setWireActive('faceswap','qc',true);
+  await runNode('qc', 1100);
+  log('<span class="ok">PASS</span> [QC Gate] 정체성 유사도 0.91 — 통과');
+  ['expr','outfit','video','faceswap'].forEach(id => setWireActive(id,'qc',false));
+
+  setWireActive('qc','post',true);
+  await runNode('post', 700);
+  log('<span class="tag">QUEUED</span> IG · Threads · X · TikTok 발행 대기열 등록');
+
+  previewBox.innerHTML = `
+    <div class="preview-card">
+      <div class="preview-label">SIMULATED PREVIEW — 실제 생성 이미지 아님</div>
+      <div class="preview-avatar"></div>
+      <div class="preview-meta">
+        <div>persona_id: <b>${persona}</b></div>
+        <div>pipeline: <b>${includeUgc ? 'gen + ugc_faceswap' : 'gen_only'}</b></div>
+        <div>qc: <b style="color:var(--accent-output)">PASS</b></div>
+        <div>targets: <b>IG, Threads, X, TikTok</b></div>
+      </div>
+    </div>`;
+
+  queueBtn.disabled = false; queueBtn.textContent = '▶ Queue Prompt';
+}
+
+renderNodes();
+renderWires();
+setUgcDim();
+queueBtn.addEventListener('click', runPipeline);
+</script>
+</body>
+</html>
