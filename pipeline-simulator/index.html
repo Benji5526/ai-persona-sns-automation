@@ -23,6 +23,7 @@
   --accent-process:#ff9d5c;
   --accent-validate:#ffcf5c;
   --accent-output:#4ade80;
+  --accent-retarget:#ff6fae;
   --accent-reject:#ff6b6b;
   --font-kr:'IBM Plex Sans KR','Malgun Gothic',sans-serif;
   --font-mono:'IBM Plex Mono','Consolas',monospace;
@@ -73,7 +74,7 @@ button{ font-family:var(--font-kr); cursor:pointer; }
   background-image: radial-gradient(circle, var(--border-soft) 1px, transparent 1px);
   background-size: 22px 22px; position:relative;
 }
-.canvas{ position:relative; width:1220px; height:620px; }
+.canvas{ position:relative; width:1220px; height:760px; }
 
 .node{
   position:absolute; background:var(--panel); border:1px solid var(--border);
@@ -135,7 +136,7 @@ svg.wires path.reject{ stroke:var(--accent-reject); stroke-dasharray:5 5; opacit
   <div class="topbar">
     <div>
       <h1>페르소나 콘텐츠 파이프라인</h1>
-      <span class="sub">02~05번 설계 문서 기반 · 표정·영상·의상 생성 + UGC 페이스스왑 → QC → 포스팅</span>
+      <span class="sub">02~05, 14번 설계 문서 기반 · 생성 + 얼굴교체 엔진 + 모션 리타겟팅 엔진 → QC → 포스팅</span>
     </div>
     <div class="field">
       <span>페르소나</span>
@@ -145,6 +146,7 @@ svg.wires path.reject{ stroke:var(--accent-reject); stroke-dasharray:5 5; opacit
       </select>
     </div>
     <label class="toggle"><input type="checkbox" id="ugcToggle" checked> UGC 페이스스왑 경로 포함</label>
+    <label class="toggle"><input type="checkbox" id="motionToggle" checked> 모션 리타겟팅 경로 포함</label>
     <span class="queue-count" id="queueCount">QUEUE: 0</span>
     <button class="queue-btn" id="queueBtn">▶ Queue Prompt</button>
   </div>
@@ -152,7 +154,7 @@ svg.wires path.reject{ stroke:var(--accent-reject); stroke-dasharray:5 5; opacit
   <div class="main">
     <div class="canvas-wrap">
       <div class="canvas" id="canvas">
-        <svg class="wires" id="wires" width="1220" height="620"></svg>
+        <svg class="wires" id="wires" width="1220" height="760"></svg>
       </div>
     </div>
 
@@ -163,7 +165,8 @@ svg.wires path.reject{ stroke:var(--accent-reject); stroke-dasharray:5 5; opacit
           <span><i style="background:var(--accent-loader)"></i>Loader</span>
           <span><i style="background:var(--accent-sampling)"></i>Sampling</span>
           <span><i style="background:var(--accent-pipeline)"></i>Pipeline</span>
-          <span><i style="background:var(--accent-process)"></i>Process</span>
+          <span><i style="background:var(--accent-process)"></i>Process (Face Swap)</span>
+          <span><i style="background:var(--accent-retarget)"></i>Retarget (Motion)</span>
           <span><i style="background:var(--accent-validate)"></i>Validate</span>
           <span><i style="background:var(--accent-output)"></i>Output</span>
         </div>
@@ -206,7 +209,13 @@ const NODES = [
   {id:'faceswap', title:'Face Swap', cat:'process', x:480, y:466, w:180, h:96,
     body:['face_ref: persona_001','blend: 0.9'],
     log:'[Face Swap] 프레임별 얼굴 합성'},
-  {id:'qc', title:'QC Gate', cat:'validate', x:720, y:236, w:170, h:160,
+  {id:'driving', title:'Driving Video', cat:'loader', x:240, y:606, w:180, h:76,
+    body:['motion_src: motion_clip_022','license: license_0002'],
+    log:'[Driving Video] 모션 소스 로드'},
+  {id:'retarget', title:'Motion Retarget', cat:'retarget', x:480, y:596, w:180, h:100,
+    body:['model: liveportrait','identity: persona_001'],
+    log:'[Motion Retarget] 정체성 조건부 프레임 재생성'},
+  {id:'qc', title:'QC Gate', cat:'validate', x:720, y:216, w:170, h:200,
     body:['id_sim ≥ 0.82','artifact_check: on','반려 시 재생성 루프'],
     log:'[QC Gate] 정체성 유사도·아티팩트 검사'},
   {id:'post', title:'Auto Post Queue', cat:'output', x:950, y:262, w:190, h:120,
@@ -221,15 +230,17 @@ const WIRES = [
   {from:'ksampler', to:'outfit'},
   {from:'ksampler', to:'video'},
   {from:'ugc', to:'faceswap', ugcOnly:true},
-  {from:'expr', to:'qc', toIdx:0, toN:4},
-  {from:'outfit', to:'qc', toIdx:1, toN:4},
-  {from:'video', to:'qc', toIdx:2, toN:4},
-  {from:'faceswap', to:'qc', toIdx:3, toN:4, ugcOnly:true},
+  {from:'driving', to:'retarget', motionOnly:true},
+  {from:'expr', to:'qc', toIdx:0, toN:5},
+  {from:'outfit', to:'qc', toIdx:1, toN:5},
+  {from:'video', to:'qc', toIdx:2, toN:5},
+  {from:'faceswap', to:'qc', toIdx:3, toN:5, ugcOnly:true},
+  {from:'retarget', to:'qc', toIdx:4, toN:5, motionOnly:true},
   {from:'qc', to:'post'},
 ];
 const CAT_COLOR = {
   loader:'var(--accent-loader)', sampling:'var(--accent-sampling)', pipeline:'var(--accent-pipeline)',
-  process:'var(--accent-process)', validate:'var(--accent-validate)', output:'var(--accent-output)'
+  process:'var(--accent-process)', retarget:'var(--accent-retarget)', validate:'var(--accent-validate)', output:'var(--accent-output)'
 };
 
 const canvas = document.getElementById('canvas');
@@ -239,6 +250,7 @@ const previewBox = document.getElementById('previewBox');
 const queueBtn = document.getElementById('queueBtn');
 const queueCountEl = document.getElementById('queueCount');
 const ugcToggle = document.getElementById('ugcToggle');
+const motionToggle = document.getElementById('motionToggle');
 let queueCount = 0;
 
 function byId(id){ return NODES.find(n => n.id === id); }
@@ -282,6 +294,7 @@ function renderWires(){
     path.setAttribute('d', wirePath(a,b));
     path.id = 'wire-'+i;
     if(w.ugcOnly) path.dataset.ugc = '1';
+    if(w.motionOnly) path.dataset.motion = '1';
     wiresSvg.appendChild(path);
   });
   const qc = byId('qc'), ks = byId('ksampler');
@@ -293,16 +306,20 @@ function renderWires(){
   wiresSvg.appendChild(reject);
 }
 
-function setUgcDim(){
-  const on = ugcToggle.checked;
-  ['ugc','faceswap'].forEach(id => {
+function setPathDim(flagKey, nodeIds, on){
+  nodeIds.forEach(id => {
     document.getElementById('node-'+id).classList.toggle('dim', !on);
   });
   WIRES.forEach((w,i) => {
-    if(w.ugcOnly) document.getElementById('wire-'+i).style.opacity = on ? '1' : '0.15';
+    if(w[flagKey]) document.getElementById('wire-'+i).style.opacity = on ? '1' : '0.15';
   });
 }
-ugcToggle.addEventListener('change', setUgcDim);
+function updateToggleDims(){
+  setPathDim('ugcOnly', ['ugc','faceswap'], ugcToggle.checked);
+  setPathDim('motionOnly', ['driving','retarget'], motionToggle.checked);
+}
+ugcToggle.addEventListener('change', updateToggleDims);
+motionToggle.addEventListener('change', updateToggleDims);
 
 function log(html){
   const line = document.createElement('div');
@@ -334,6 +351,7 @@ function setWireActive(fromId, toId, active){
 
 async function runPipeline(){
   const includeUgc = ugcToggle.checked;
+  const includeMotion = motionToggle.checked;
   const persona = document.getElementById('personaSelect').value;
 
   queueBtn.disabled = true; queueBtn.textContent = '⏳ 실행 중...';
@@ -346,7 +364,7 @@ async function runPipeline(){
   previewBox.innerHTML = '<div class="preview-empty">생성 중...</div>';
 
   queueCount++; queueCountEl.textContent = 'QUEUE: '+queueCount;
-  log(`<span class="dim">─ job #${queueCount} · persona=${persona} · ugc=${includeUgc} ─</span>`);
+  log(`<span class="dim">─ job #${queueCount} · persona=${persona} · ugc=${includeUgc} · motion=${includeMotion} ─</span>`);
 
   await runNode('lora', 700);
   await runNode('ckpt', 500);
@@ -357,18 +375,28 @@ async function runPipeline(){
   setWireActive('ksampler','expr',true); setWireActive('ksampler','outfit',true); setWireActive('ksampler','video',true);
   const parallel = [runNode('expr', 900), runNode('outfit', 950), runNode('video', 1400)];
   if(includeUgc){ parallel.push(runNode('ugc', 500).then(() => runNode('faceswap', 1100))); }
+  if(includeMotion){
+    setWireActive('driving','retarget',true);
+    parallel.push(runNode('driving', 450).then(() => runNode('retarget', 1300)));
+  }
   await Promise.all(parallel);
   setWireActive('ksampler','expr',false); setWireActive('ksampler','outfit',false); setWireActive('ksampler','video',false);
+  setWireActive('driving','retarget',false);
 
   ['expr','outfit','video'].forEach(id => setWireActive(id,'qc',true));
   if(includeUgc) setWireActive('faceswap','qc',true);
+  if(includeMotion) setWireActive('retarget','qc',true);
   await runNode('qc', 1100);
   log('<span class="ok">PASS</span> [QC Gate] 정체성 유사도 0.91 — 통과');
-  ['expr','outfit','video','faceswap'].forEach(id => setWireActive(id,'qc',false));
+  ['expr','outfit','video','faceswap','retarget'].forEach(id => setWireActive(id,'qc',false));
 
   setWireActive('qc','post',true);
   await runNode('post', 700);
   log('<span class="tag">QUEUED</span> IG · Threads · X · TikTok 발행 대기열 등록');
+
+  const pipelineParts = ['gen'];
+  if(includeUgc) pipelineParts.push('ugc_faceswap');
+  if(includeMotion) pipelineParts.push('motion_retarget');
 
   previewBox.innerHTML = `
     <div class="preview-card">
@@ -376,7 +404,7 @@ async function runPipeline(){
       <div class="preview-avatar"></div>
       <div class="preview-meta">
         <div>persona_id: <b>${persona}</b></div>
-        <div>pipeline: <b>${includeUgc ? 'gen + ugc_faceswap' : 'gen_only'}</b></div>
+        <div>pipeline: <b>${pipelineParts.join(' + ')}</b></div>
         <div>qc: <b style="color:var(--accent-output)">PASS</b></div>
         <div>targets: <b>IG, Threads, X, TikTok</b></div>
       </div>
@@ -387,7 +415,7 @@ async function runPipeline(){
 
 renderNodes();
 renderWires();
-setUgcDim();
+updateToggleDims();
 queueBtn.addEventListener('click', runPipeline);
 </script>
 </body>
