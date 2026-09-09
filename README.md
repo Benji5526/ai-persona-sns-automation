@@ -75,6 +75,7 @@ flowchart TB
 | [docs/10-budget-simulation.md](docs/10-budget-simulation.md) | 예상 예산 시뮬레이션 (GPU/LLM/UGC/SNS API) |
 | [docs/11-recommended-sequence.md](docs/11-recommended-sequence.md) | 권장 착수 순서 — 무엇을 먼저 검증할 것인가 (필독) |
 | [docs/12-hardware-spec.md](docs/12-hardware-spec.md) | 노트북 사양 및 예산 배분 (1,000만원 기준) |
+| [docs/13-pilot-plan.md](docs/13-pilot-plan.md) | 파일럿 실행 계획 (1~2개월, 월 1만원 미만) |
 
 ## 설계 원칙
 
