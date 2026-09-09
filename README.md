@@ -71,6 +71,7 @@ flowchart TB
 | [docs/06-data-model.md](docs/06-data-model.md) | 페르소나/대화/에셋 데이터 모델 |
 | [docs/07-compliance.md](docs/07-compliance.md) | 운영·윤리·법적 고려사항 (필독) |
 | [docs/08-roadmap.md](docs/08-roadmap.md) | 단계별 구축 로드맵 |
+| [docs/09-llm-serving.md](docs/09-llm-serving.md) | 로컬 LLM 서빙 (vLLM, 멀티 LoRA) |
 
 ## 설계 원칙
 
