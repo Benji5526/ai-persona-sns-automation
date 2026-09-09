@@ -49,10 +49,14 @@ flowchart TB
 | 응답 스케줄러 | "동시 발송"이 아닌 "순차·지연" 큐잉 | [01](01-reply-automation.md) |
 | 로컬 LLM 서버 (vLLM) | 의도 분석·응답 생성 추론, 페르소나별 LoRA 멀티 서빙 | [09](09-llm-serving.md) |
 | 모델 트레이닝 | 페르소나 이미지 데이터셋 → LoRA/체크포인트 | [02](02-model-training.md) |
-| 표정/영상/의상 파이프라인 | ComfyUI 워크플로우 그래프로 변형 생성 | [03](03-content-pipeline.md) |
-| 페이스스왑 파이프라인 | 구매 UGC에 학습된 얼굴 합성 | [04](04-faceswap-ugc.md) |
-| QC 게이트 | 자동/수동 품질 검수, 통과분만 다음 단계 진행 | [03](03-content-pipeline.md), [04](04-faceswap-ugc.md) |
+| 표정/영상/의상 파이프라인 (생성 엔진) | ComfyUI 워크플로우 그래프로 변형 생성 (diffusion 기반) | [03](03-content-pipeline.md) |
+| 얼굴교체 엔진 | 구매 UGC(이미지/영상)에 학습된 얼굴 합성 — 동일 모델, 입력 타입만 분기 | [04](04-faceswap-ugc.md) |
+| 모션 리타겟팅 엔진 | 페르소나 이미지 정체성 + 드라이빙 영상 움직임 → 새 영상 재생성 (얼굴교체와 다른 모델 계열) | [14](14-motion-reenactment.md) |
+| QC 게이트 | 자동/수동 품질 검수, 3개 엔진 공통 통과 조건 | [03](03-content-pipeline.md), [04](04-faceswap-ugc.md), [14](14-motion-reenactment.md) |
 | 자동 포스팅 | 검수 통과 에셋을 SNS API로 발행 | [05](05-auto-posting.md) |
+
+> 콘텐츠 자동화(Axis B)는 서로 다른 모델을 쓰는 **3개의 독립 엔진**(생성/얼굴교체/모션 리타겟팅)으로 구성되며,
+> 페르소나 식별자([02](02-model-training.md))·QC 게이트·에셋 스키마([06](06-data-model.md))만 공용입니다.
 
 ## 3. 배치 경계 (제안)
 

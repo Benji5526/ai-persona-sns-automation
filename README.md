@@ -71,7 +71,7 @@ flowchart TB
 | [docs/01-reply-automation.md](docs/01-reply-automation.md) | DM/댓글 휴먼라이크 자동응답 설계 |
 | [docs/02-model-training.md](docs/02-model-training.md) | ComfyUI 기반 페르소나 이미지 모델 트레이닝 |
 | [docs/03-content-pipeline.md](docs/03-content-pipeline.md) | 표정 변화 / 숏폼 영상 / 의상·메이크업 체인지 파이프라인 |
-| [docs/04-faceswap-ugc.md](docs/04-faceswap-ugc.md) | 구매 UGC 페이스스왑 자동화 |
+| [docs/04-faceswap-ugc.md](docs/04-faceswap-ugc.md) | 얼굴교체 엔진 — 구매 UGC 페이스스왑 (이미지/영상) |
 | [docs/05-auto-posting.md](docs/05-auto-posting.md) | 자동 포스팅 연동 (확장 단계) |
 | [docs/06-data-model.md](docs/06-data-model.md) | 페르소나/대화/에셋 데이터 모델 |
 | [docs/07-compliance.md](docs/07-compliance.md) | 운영·윤리·법적 고려사항 (필독) |
@@ -81,6 +81,7 @@ flowchart TB
 | [docs/11-recommended-sequence.md](docs/11-recommended-sequence.md) | 권장 착수 순서 — 무엇을 먼저 검증할 것인가 (필독) |
 | [docs/12-hardware-spec.md](docs/12-hardware-spec.md) | 노트북 사양 및 예산 배분 (1,000만원 기준) |
 | [docs/13-pilot-plan.md](docs/13-pilot-plan.md) | 파일럿 실행 계획 (1~2개월, 월 1만원 미만) |
+| [docs/14-motion-reenactment.md](docs/14-motion-reenactment.md) | 모션 리타겟팅 엔진 — 이미지 인물을 영상 인물로 변경 |
 
 ## 설계 원칙
 
