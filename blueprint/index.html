@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 페르소나 청사진</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bp-ground:#0f2d4d;
+  --bp-ground-2:#0a2340;
+  --bp-paper:#152f52;
+  --bp-ink:#d7e9fb;
+  --bp-ink-dim:#7ea2c9;
+  --bp-accent:#ffb454;
+  --bp-warn:#ff8066;
+  --bp-line-faint: rgba(215,233,251,0.08);
+  --bp-line-faint-2: rgba(215,233,251,0.14);
+  --font-kr:'IBM Plex Sans KR', 'Malgun Gothic', sans-serif;
+  --font-mono:'IBM Plex Mono', 'Consolas', monospace;
+}
+*{box-sizing:border-box;}
+body{
+  background:var(--bp-ground);
+  color:var(--bp-ink);
+  font-family:var(--font-kr);
+  background-image:
+    repeating-linear-gradient(0deg, var(--bp-line-faint) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(90deg, var(--bp-line-faint) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(0deg, var(--bp-line-faint-2) 0 1px, transparent 1px 16px),
+    repeating-linear-gradient(90deg, var(--bp-line-faint-2) 0 1px, transparent 1px 16px);
+}
+h1,h2,h3{ text-wrap:balance; margin:0; font-family:var(--font-kr); font-weight:700; }
+.mono{ font-family:var(--font-mono); }
+.wrap{ max-width:1180px; margin:0 auto; padding:28px 20px 80px; }
+
+/* ---------- top title block ---------- */
+.masthead{
+  border:1px solid var(--bp-ink-dim);
+  padding:22px 26px;
+  position:relative;
+  margin-bottom:34px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+}
+.masthead::before,.masthead::after,
+.tick{
+  content:'';
+}
+.corner{ position:absolute; width:16px; height:16px; }
+.corner svg{ display:block; }
+.corner.tl{ top:-1px; left:-1px; }
+.corner.tr{ top:-1px; right:-1px; transform:scaleX(-1); }
+.corner.bl{ bottom:-1px; left:-1px; transform:scaleY(-1); }
+.corner.br{ bottom:-1px; right:-1px; transform:scale(-1,-1); }
+
+.eyebrow{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.14em;
+  color:var(--bp-accent); text-transform:uppercase; margin-bottom:10px;
+}
+.masthead h1{ font-size:clamp(26px,4vw,38px); line-height:1.2; }
+.masthead .sub{ color:var(--bp-ink-dim); font-size:14.5px; margin-top:8px; max-width:60ch; }
+
+.titleblock{
+  margin-top:22px; padding-top:16px; border-top:1px dashed var(--bp-ink-dim);
+  display:grid; grid-template-columns:repeat(5,1fr); gap:14px;
+  font-family:var(--font-mono); font-size:12px;
+}
+.titleblock div span{ display:block; color:var(--bp-ink-dim); font-size:10px; letter-spacing:.08em; margin-bottom:3px; text-transform:uppercase; }
+.titleblock a{ color:var(--bp-ink); }
+
+.stamp{
+  position:absolute; top:14px; right:22px;
+  border:2px solid var(--bp-warn); color:var(--bp-warn);
+  padding:8px 14px; font-family:var(--font-mono); font-size:11.5px; font-weight:600;
+  letter-spacing:.08em; text-transform:uppercase; transform:rotate(-6deg);
+  opacity:.85; line-height:1.5; text-align:center; background:rgba(255,128,102,0.04);
+}
+@media (max-width:720px){ .stamp{ position:static; transform:rotate(-2deg); display:inline-block; margin-top:16px; } .titleblock{ grid-template-columns:repeat(2,1fr);} }
+
+/* ---------- sheet ---------- */
+.sheet{
+  position:relative; border:1px solid var(--bp-ink-dim);
+  padding:30px 30px 20px; margin-bottom:40px; background:rgba(255,255,255,0.015);
+}
+.sheet-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:6px; flex-wrap:wrap; }
+.sheet-num{ font-family:var(--font-mono); color:var(--bp-accent); font-size:13px; letter-spacing:.1em; }
+.sheet h2{ font-size:clamp(19px,2.6vw,24px); }
+.sheet-desc{ color:var(--bp-ink-dim); font-size:13.5px; max-width:68ch; margin:6px 0 22px; }
+
+.diagram-wrap{ overflow-x:auto; margin-bottom:22px; border:1px solid var(--bp-line-faint-2); background:var(--bp-ground-2); }
+.diagram-wrap svg{ display:block; min-width:640px; width:100%; height:auto; }
+svg text{ font-family:var(--font-kr); fill:var(--bp-ink); }
+svg text.mono-lbl{ font-family:var(--font-mono); fill:var(--bp-accent); }
+svg text.dim{ fill:var(--bp-ink-dim); font-family:var(--font-mono); }
+
+.footnote{ font-family:var(--font-mono); font-size:11px; color:var(--bp-ink-dim); margin-top:6px; }
+
+/* legend */
+.legend{ display:flex; flex-wrap:wrap; gap:20px; padding:14px 16px; border:1px dashed var(--bp-ink-dim); font-size:12.5px; color:var(--bp-ink-dim); margin-bottom:22px;}
+.legend .item{ display:flex; align-items:center; gap:8px; }
+.legend svg{ flex:none; }
+
+/* spec table */
+.spec-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.spec-table th,.spec-table td{ border-bottom:1px solid var(--bp-line-faint-2); padding:8px 10px; text-align:left; }
+.spec-table th{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--bp-ink-dim); font-weight:500; }
+.spec-table td.num{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--bp-accent); }
+
+.two-col{ display:grid; grid-template-columns:1.1fr 1fr; gap:24px; align-items:start; }
+@media (max-width:820px){ .two-col{ grid-template-columns:1fr; } }
+
+/* roadmap */
+.roadmap{ display:flex; overflow-x:auto; padding:10px 0 6px; gap:0; }
+.phase{ flex:none; width:150px; position:relative; padding:0 10px 0 0; }
+.phase .rail{ height:2px; background:var(--bp-ink-dim); position:relative; margin-bottom:14px; }
+.phase .rail::before{ content:''; position:absolute; left:0; top:-4px; width:10px; height:10px; border:2px solid var(--bp-accent); border-radius:50%; background:var(--bp-ground); }
+.phase:last-child .rail{ background:linear-gradient(90deg, var(--bp-ink-dim) 60%, transparent 60%); }
+.phase .pnum{ font-family:var(--font-mono); color:var(--bp-accent); font-size:12px; }
+.phase .ptitle{ font-size:13px; margin-top:4px; line-height:1.4; max-width:22ch; }
+
+/* redline notes */
+.redline-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+@media (max-width:720px){ .redline-grid{ grid-template-columns:1fr; } }
+.redline{ border:1px solid rgba(255,128,102,0.4); padding:12px 14px; display:flex; gap:10px; background:rgba(255,128,102,0.04); }
+.redline svg{ flex:none; margin-top:2px; }
+.redline .risk{ font-size:13px; font-weight:600; color:var(--bp-warn); margin-bottom:3px; }
+.redline .fix{ font-size:12.5px; color:var(--bp-ink-dim); }
+
+.doc-refs{ margin-top:10px; font-family:var(--font-mono); font-size:11.5px; color:var(--bp-ink-dim); }
+.doc-refs a{ color:var(--bp-ink); }
+
+footer{ text-align:center; padding-top:10px; font-family:var(--font-mono); font-size:11px; color:var(--bp-ink-dim); }
+footer a{ color:var(--bp-ink); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ===================== MASTHEAD / TITLE BLOCK ===================== -->
+  <div class="masthead">
+    <div class="corner tl"><svg width="16" height="16"><path d="M0 12 V0 H12" stroke="#7ea2c9" stroke-width="1.5" fill="none"/></svg></div>
+    <div class="corner tr"><svg width="16" height="16"><path d="M0 12 V0 H12" stroke="#7ea2c9" stroke-width="1.5" fill="none"/></svg></div>
+    <div class="corner bl"><svg width="16" height="16"><path d="M0 12 V0 H12" stroke="#7ea2c9" stroke-width="1.5" fill="none"/></svg></div>
+    <div class="corner br"><svg width="16" height="16"><path d="M0 12 V0 H12" stroke="#7ea2c9" stroke-width="1.5" fill="none"/></svg></div>
+
+    <div class="stamp">설계 검토용<br>NOT&nbsp;FOR<br>IMPLEMENTATION</div>
+
+    <div class="eyebrow">시스템 도면 · Blueprint Set</div>
+    <h1>AI 페르소나 SNS 자동화 시스템</h1>
+    <p class="sub">대화 자동화(휴먼라이크 DM·댓글 응답)와 콘텐츠 자동화(ComfyUI 페르소나 모델 → 표정/영상/의상 파이프라인 → UGC 페이스스왑 → 자동 포스팅)를 하나의 시스템으로 정리한 설계 도면 4매.</p>
+
+    <div class="titleblock">
+      <div><span>Dwg No.</span>AIP-2026-001</div>
+      <div><span>Scale</span>N.T.S.</div>
+      <div><span>Rev</span>00</div>
+      <div><span>Date</span>2026-09-09</div>
+      <div><span>Repo</span><a href="https://github.com/Benji5526/ai-persona-sns-automation" target="_blank" rel="noopener">Benji5526/ai-persona-sns-automation</a></div>
+    </div>
+  </div>
+
+  <!-- ===================== SHEET 1 — SYSTEM OVERVIEW ===================== -->
+  <section class="sheet">
+    <div class="sheet-head"><span class="sheet-num">SHEET 1 / 4</span><h2>시스템 개요 — 두 개의 축</h2></div>
+    <p class="sheet-desc">페르소나 정의(코어)를 공용 자산으로 두고, 대화 자동화(AXIS A)와 콘텐츠 자동화(AXIS B)가 각각 파이프라인을 구성한다. 콘텐츠 결과물에 달리는 반응은 다시 대화 자동화로 유입되어 순환한다.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 980 470" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#d7e9fb"/>
+          </marker>
+          <marker id="arrowDim" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#7ea2c9"/>
+          </marker>
+        </defs>
+
+        <!-- persona core -->
+        <rect x="390" y="14" width="200" height="58" fill="none" stroke="#ffb454" stroke-width="1.6"/>
+        <text x="490" y="36" text-anchor="middle" font-size="12" class="mono-lbl">PERSONA CORE</text>
+        <text x="490" y="56" text-anchor="middle" font-size="12.5">페르소나 정의 · 학습 모델</text>
+
+        <!-- connectors from core -->
+        <path d="M420 72 L160 128" stroke="#7ea2c9" stroke-width="1.3" stroke-dasharray="5 5" fill="none" marker-end="url(#arrowDim)"/>
+        <text x="255" y="98" font-size="10.5" class="dim">톤·경계 반영</text>
+        <path d="M560 72 L790 128" stroke="#7ea2c9" stroke-width="1.3" stroke-dasharray="5 5" fill="none" marker-end="url(#arrowDim)"/>
+        <text x="700" y="98" font-size="10.5" class="dim">모델·얼굴 제공</text>
+
+        <!-- AXIS A column -->
+        <text x="40" y="118" font-size="11" class="mono-lbl">AXIS A — 대화 자동화</text>
+        <g font-size="13">
+          <rect x="40" y="128" width="230" height="50" fill="none" stroke="#d7e9fb"/>
+          <text x="155" y="158" text-anchor="middle">01 SNS 수집기</text>
+          <path d="M155 178 V204" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="40" y="204" width="230" height="50" fill="none" stroke="#d7e9fb"/>
+          <text x="155" y="234" text-anchor="middle">02 의도·문맥 분석</text>
+          <path d="M155 254 V280" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="40" y="280" width="230" height="50" fill="none" stroke="#d7e9fb"/>
+          <text x="155" y="310" text-anchor="middle">03 휴먼라이크 스케줄러</text>
+          <path d="M155 330 V356" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="40" y="356" width="230" height="50" fill="none" stroke="#d7e9fb"/>
+          <text x="155" y="386" text-anchor="middle">04 응답 발송</text>
+        </g>
+        <circle cx="290" cy="130" r="11" fill="none" stroke="#ffb454"/>
+        <text x="290" y="134" text-anchor="middle" font-size="11" class="mono-lbl">①</text>
+        <text x="308" y="134" font-size="10.5" class="dim">SEE SHEET 2</text>
+
+        <!-- AXIS B column -->
+        <text x="710" y="118" font-size="11" class="mono-lbl">AXIS B — 콘텐츠 자동화</text>
+        <g font-size="12.5">
+          <rect x="710" y="128" width="230" height="44" fill="none" stroke="#d7e9fb"/>
+          <text x="825" y="155" text-anchor="middle">05 모델 트레이닝</text>
+          <path d="M825 172 V196" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="710" y="196" width="230" height="44" fill="none" stroke="#d7e9fb"/>
+          <text x="825" y="223" text-anchor="middle">06 생성 파이프라인</text>
+          <path d="M825 240 V264" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="710" y="264" width="230" height="44" fill="none" stroke="#d7e9fb"/>
+          <text x="825" y="291" text-anchor="middle">07 UGC 페이스스왑</text>
+          <path d="M825 308 V332" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="710" y="332" width="230" height="44" fill="none" stroke="#d7e9fb"/>
+          <text x="825" y="359" text-anchor="middle">08 QC 게이트</text>
+          <path d="M825 376 V400" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="710" y="400" width="230" height="44" fill="none" stroke="#d7e9fb"/>
+          <text x="825" y="427" text-anchor="middle">09 자동 포스팅</text>
+        </g>
+        <circle cx="960" cy="130" r="11" fill="none" stroke="#ffb454"/>
+        <text x="960" y="134" text-anchor="middle" font-size="11" class="mono-lbl">②</text>
+        <text x="895" y="150" font-size="10.5" class="dim" text-anchor="end">SEE SHEET 3</text>
+
+        <!-- feedback loop -->
+        <path d="M825 444 C 825 468, 155 468, 155 406" stroke="#7ea2c9" stroke-width="1.3" stroke-dasharray="4 5" fill="none" marker-end="url(#arrowDim)"/>
+        <text x="490" y="463" text-anchor="middle" font-size="10.5" class="dim">반응 유입 (댓글 · DM)</text>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <div class="item"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#d7e9fb" stroke-width="1.5"/></svg> 실선 = 처리 흐름</div>
+      <div class="item"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#7ea2c9" stroke-width="1.5" stroke-dasharray="4 4"/></svg> 점선 = 참조·데이터 제공</div>
+      <div class="item"><svg width="18" height="18"><circle cx="9" cy="9" r="8" fill="none" stroke="#ffb454"/></svg> 상세 시트 참조 번호</div>
+      <div class="item"><svg width="18" height="18"><polygon points="9,1 17,9 9,17 1,9" fill="none" stroke="#d7e9fb"/></svg> 분기 · 게이트</div>
+    </div>
+    <p class="doc-refs">근거 문서 — <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/ARCHITECTURE.md">ARCHITECTURE.md</a></p>
+  </section>
+
+  <!-- ===================== SHEET 2 — CONVERSATION AUTOMATION ===================== -->
+  <section class="sheet">
+    <div class="sheet-head"><span class="sheet-num">SHEET 2 / 4</span><h2>대화 자동화 — 휴먼라이크 응답 스케줄러</h2></div>
+    <p class="sheet-desc">동시에 여러 건을 답하지 않는다. 도착 순서대로, 사람이 확인·타이핑하는 리듬을 흉내낸 지연 분포를 따라 하나씩 큐를 소비한다.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 1080 210" xmlns="http://www.w3.org/2000/svg">
+        <g font-size="12.5">
+          <rect x="20" y="30" width="150" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="95" y="55" text-anchor="middle">DM · 댓글</text><text x="95" y="72" text-anchor="middle">이벤트 수신</text>
+          <path d="M170 58 H206" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="206" y="30" width="150" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="281" y="55" text-anchor="middle">대화 컨텍스트</text><text x="281" y="72" text-anchor="middle">조회 · 갱신</text>
+          <path d="M356 58 H392" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="392" y="30" width="150" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="467" y="55" text-anchor="middle">의도 · 우선순위</text><text x="467" y="72" text-anchor="middle">분석</text>
+          <path d="M542 58 H578" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <polygon points="646,20 716,58 646,96 576,58" fill="none" stroke="#d7e9fb"/>
+          <text x="646" y="54" text-anchor="middle" font-size="11.5">안전 필터</text>
+          <text x="646" y="68" text-anchor="middle" font-size="11.5">통과?</text>
+
+          <path d="M716 58 H752" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+          <text x="734" y="46" text-anchor="middle" font-size="10.5" class="dim">Y</text>
+
+          <rect x="752" y="30" width="150" height="56" fill="none" stroke="#ffb454"/>
+          <text x="827" y="55" text-anchor="middle">휴먼라이크</text><text x="827" y="72" text-anchor="middle">스케줄러</text>
+          <path d="M902 58 H938" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="938" y="30" width="122" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="999" y="55" text-anchor="middle" font-size="11.5">응답 생성</text><text x="999" y="72" text-anchor="middle" font-size="11.5">→ 발송</text>
+
+          <path d="M646 96 V150 H827 V96" stroke="#7ea2c9" stroke-dasharray="4 4" fill="none" marker-end="none"/>
+          <text x="670" y="112" font-size="10.5" class="dim">N</text>
+          <rect x="757" y="140" width="140" height="46" fill="none" stroke="#ff8066"/>
+          <text x="827" y="167" text-anchor="middle" font-size="11" fill="#ff8066">사람 에스컬레이션</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <p class="footnote" style="margin-bottom:8px;">지연 시간 분포 — 고정 딜레이 대신 확률분포에서 샘플링</p>
+        <div class="diagram-wrap" style="margin-bottom:0;">
+          <svg viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg">
+            <line x1="40" y1="160" x2="450" y2="160" stroke="#7ea2c9"/>
+            <line x1="40" y1="160" x2="40" y2="20" stroke="#7ea2c9"/>
+            <path d="M40,158 C 90,158 100,40 150,40 C 200,40 220,150 300,156 C 360,159 400,159 450,159"
+                  fill="none" stroke="#ffb454" stroke-width="2"/>
+            <line x1="150" y1="160" x2="150" y2="40" stroke="#ffb454" stroke-width="1" stroke-dasharray="3 4"/>
+            <text x="150" y="180" text-anchor="middle" font-size="11" class="dim">중앙값 ≈ 90s</text>
+            <text x="40" y="180" font-size="11" class="dim">20s</text>
+            <text x="450" y="180" text-anchor="end" font-size="11" class="dim">900s</text>
+            <text x="20" y="24" font-size="11" class="dim" transform="rotate(-90 20 24)">밀도</text>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <p class="footnote" style="margin-bottom:8px;">SPEC — 페르소나 001 예시 값</p>
+        <table class="spec-table">
+          <tr><th>파라미터</th><th>값</th></tr>
+          <tr><td>동시 처리 건수</td><td class="num">1–3</td></tr>
+          <tr><td>지연 분포</td><td class="num">Lognormal(20–900s)</td></tr>
+          <tr><td>활동 시간대</td><td class="num">09–12, 20–23:30</td></tr>
+          <tr><td>일일 응답 상한</td><td class="num">150건</td></tr>
+          <tr><td>스레드 쿨다운</td><td class="num">있음</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="doc-refs">근거 문서 — <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/01-reply-automation.md">01-reply-automation.md</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/06-data-model.md">06-data-model.md</a></p>
+  </section>
+
+  <!-- ===================== SHEET 3 — CONTENT AUTOMATION ===================== -->
+  <section class="sheet">
+    <div class="sheet-head"><span class="sheet-num">SHEET 3 / 4</span><h2>콘텐츠 자동화 — 생성 &amp; 페이스스왑 파이프라인</h2></div>
+    <p class="sheet-desc">학습된 페르소나 모델은 생성 파이프라인(표정·영상·의상)과 UGC 페이스스왑, 두 경로로 소비되어 하나의 QC 게이트를 통과한 뒤 발행된다. UGC 경로는 권리확인 게이트를 먼저 통과해야 한다.</p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 960 380" xmlns="http://www.w3.org/2000/svg">
+        <g font-size="12.5">
+          <!-- main row -->
+          <rect x="20" y="130" width="140" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="90" y="163" text-anchor="middle">데이터셋</text>
+          <path d="M160 158 H196" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="196" y="130" width="150" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="271" y="163" text-anchor="middle">모델 트레이닝</text>
+          <path d="M346 158 H382" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="382" y="130" width="180" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="472" y="155" text-anchor="middle" font-size="11.5">생성 파이프라인</text>
+          <text x="472" y="171" text-anchor="middle" font-size="10.5" class="dim">표정 · 영상 · 의상</text>
+          <path d="M562 158 H598" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <!-- QC valve -->
+          <circle cx="655" cy="158" r="52" fill="none" stroke="#ffb454" stroke-width="1.6"/>
+          <polygon points="625,140 655,158 625,176" fill="none" stroke="#ffb454"/>
+          <polygon points="685,140 655,158 685,176" fill="none" stroke="#ffb454"/>
+          <text x="655" y="220" text-anchor="middle" font-size="11.5" class="mono-lbl">QC GATE</text>
+          <path d="M707 158 H750" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="750" y="130" width="190" height="56" fill="none" stroke="#d7e9fb"/>
+          <text x="845" y="163" text-anchor="middle">자동 포스팅</text>
+
+          <!-- UGC row -->
+          <rect x="20" y="286" width="140" height="52" fill="none" stroke="#d7e9fb"/>
+          <text x="90" y="316" text-anchor="middle" font-size="11.5">UGC 소스</text>
+          <path d="M160 312 H196" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <polygon points="256,286 316,312 256,338 196,312" fill="none" stroke="#ff8066"/>
+          <text x="256" y="308" text-anchor="middle" font-size="10.5" fill="#ff8066">권리확인</text>
+          <text x="256" y="321" text-anchor="middle" font-size="10.5" fill="#ff8066">게이트</text>
+          <path d="M316 312 H382" stroke="#d7e9fb" marker-end="url(#arrow)"/>
+
+          <rect x="382" y="286" width="180" height="52" fill="none" stroke="#d7e9fb"/>
+          <text x="472" y="317" text-anchor="middle">페이스스왑</text>
+          <path d="M562 312 C 610 312, 610 210, 630 190" stroke="#d7e9fb" fill="none" marker-end="url(#arrow)"/>
+
+          <!-- reject loop -->
+          <path d="M655 210 C 655 260, 472 260, 472 210" stroke="#7ea2c9" stroke-dasharray="4 4" fill="none" marker-end="url(#arrowDim)"/>
+          <text x="565" y="255" text-anchor="middle" font-size="10.5" class="dim">반려 · 재생성</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="legend" style="margin-bottom:0;">
+      <div class="item"><svg width="18" height="18"><polygon points="9,1 17,9 9,17 1,9" fill="none" stroke="#ff8066"/></svg> 권리확인 게이트 (라이선스 필수)</div>
+      <div class="item"><svg width="18" height="18"><circle cx="9" cy="9" r="8" fill="none" stroke="#ffb454"/><polygon points="4,4 9,9 4,14" fill="none" stroke="#ffb454"/><polygon points="14,4 9,9 14,14" fill="none" stroke="#ffb454"/></svg> QC 게이트 (밸브 기호)</div>
+    </div>
+    <p class="doc-refs">근거 문서 — <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/02-model-training.md">02</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/03-content-pipeline.md">03</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/04-faceswap-ugc.md">04-faceswap-ugc.md</a></p>
+  </section>
+
+  <!-- ===================== SHEET 4 — ROADMAP & COMPLIANCE ===================== -->
+  <section class="sheet">
+    <div class="sheet-head"><span class="sheet-num">SHEET 4 / 4</span><h2>공정표 &amp; 현장 노트</h2></div>
+    <p class="sheet-desc">두 축은 Phase 1–2를 병렬 착수할 수 있다. Phase 4(UGC 페이스스왑)는 법률 검토 선행, Phase 5(완전 자동 발행)는 반자동 운영을 한 차례 거친 뒤 진입한다.</p>
+
+    <div class="roadmap">
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.0</div><div class="ptitle">기반 준비 · 권리관계 정리</div></div>
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.1</div><div class="ptitle">대화 자동화 MVP (반자동)</div></div>
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.2</div><div class="ptitle">이미지 모델 트레이닝</div></div>
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.3</div><div class="ptitle">콘텐츠 파이프라인 확장</div></div>
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.4</div><div class="ptitle">UGC 페이스스왑</div></div>
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.5</div><div class="ptitle">완전 자동화 통합</div></div>
+      <div class="phase"><div class="rail"></div><div class="pnum">PH.6</div><div class="ptitle">다중 페르소나 스케일아웃</div></div>
+    </div>
+
+    <p class="footnote" style="margin:26px 0 10px;">REDLINE — 리스크 &amp; 완화 장치</p>
+    <div class="redline-grid">
+      <div class="redline">
+        <svg width="14" height="18" viewBox="0 0 14 18"><path d="M1 1 H13 L7 6 L13 11 H1 Z" fill="none" stroke="#ff8066"/><line x1="1" y1="1" x2="1" y2="17" stroke="#ff8066"/></svg>
+        <div><div class="risk">스팸 · 계정 정지</div><div class="fix">스케줄러 동시성 1–3 / 일일 상한으로 완화</div></div>
+      </div>
+      <div class="redline">
+        <svg width="14" height="18" viewBox="0 0 14 18"><path d="M1 1 H13 L7 6 L13 11 H1 Z" fill="none" stroke="#ff8066"/><line x1="1" y1="1" x2="1" y2="17" stroke="#ff8066"/></svg>
+        <div><div class="risk">무단 초상권 사용</div><div class="fix">UGC 권리확인 게이트 + 라이선스 레코드 강제 연결</div></div>
+      </div>
+      <div class="redline">
+        <svg width="14" height="18" viewBox="0 0 14 18"><path d="M1 1 H13 L7 6 L13 11 H1 Z" fill="none" stroke="#ff8066"/><line x1="1" y1="1" x2="1" y2="17" stroke="#ff8066"/></svg>
+        <div><div class="risk">합성 콘텐츠 은폐</div><div class="fix">에셋 메타데이터에 source 항상 기록, 라벨링 스위치 구조</div></div>
+      </div>
+      <div class="redline">
+        <svg width="14" height="18" viewBox="0 0 14 18"><path d="M1 1 H13 L7 6 L13 11 H1 Z" fill="none" stroke="#ff8066"/><line x1="1" y1="1" x2="1" y2="17" stroke="#ff8066"/></svg>
+        <div><div class="risk">완전 자동 발행 리스크</div><div class="fix">승인 후 발행(반자동)으로 단계적 도입</div></div>
+      </div>
+    </div>
+    <p class="doc-refs">근거 문서 — <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/07-compliance.md">07-compliance.md</a>, <a href="https://github.com/Benji5526/ai-persona-sns-automation/blob/master/docs/08-roadmap.md">08-roadmap.md</a></p>
+  </section>
+
+  <footer>
+    설계 전용 문서 · 구현 코드 미포함 &nbsp;·&nbsp; © 2026 All Rights Reserved &nbsp;·&nbsp;
+    <a href="https://github.com/Benji5526/ai-persona-sns-automation" target="_blank" rel="noopener">github.com/Benji5526/ai-persona-sns-automation</a>
+  </footer>
+
+</div>
+</body>
+</html>
