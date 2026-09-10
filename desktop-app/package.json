@@ -1,0 +1,38 @@
+{
+  "name": "persona-pipeline-simulator",
+  "version": "1.0.0",
+  "description": "페르소나 콘텐츠 파이프라인 시뮬레이터 — ComfyUI 노드 그래프 실행 흐름 데모 (실제 GPU/ComfyUI 미실행)",
+  "main": "main.js",
+  "author": "Benji5526",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.benji5526.persona-pipeline-simulator",
+    "productName": "PersonaPipelineSimulator",
+    "asar": true,
+    "files": [
+      "main.js",
+      "renderer/**/*"
+    ],
+    "win": {
+      "target": ["portable"],
+      "signAndEditExecutable": false,
+      "verifyUpdateCodeSignature": false
+    },
+    "forceCodeSigning": false,
+    "portable": {
+      "artifactName": "PersonaPipelineSimulator.exe"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}

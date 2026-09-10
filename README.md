@@ -53,6 +53,9 @@ vLLM 로컬 서빙, 완전 자동 응답, 자동 포스팅, 노트북/워크스�
 ComfyUI 노드 그래프 형태로 생성·페이스스왑·QC·자동 포스팅 파이프라인의 실행 흐름을 재현한 인터랙티브 데모 —
 [pipeline-simulator/index.html](pipeline-simulator/index.html) (다운로드 후 브라우저로 열어서 확인, 실제 GPU/ComfyUI는 실행하지 않는 시뮬레이션입니다)
 
+**단독 실행 파일(.exe) 버전**: [desktop-app/](desktop-app/) — 브라우저 없이 더블클릭으로 실행되는 Electron
+포터블 앱으로 패키징. 빌드 방법과 실행 시 주의사항(SmartScreen 등)은 [desktop-app/README.md](desktop-app/README.md) 참고.
+
 ## 아키텍처
 
 ```mermaid
